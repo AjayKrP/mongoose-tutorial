@@ -1,28 +1,9 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+require('./db')
 
-// connect with local database
-mongoose.connect('mongodb://localhost:27017/test', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-
-// syntax to connect hosted databse
-//mongoose.connect('mongodb://USERNAME:PASSWORD@HOST::PORT/DATABASE_NAME')
-
-// Create connection
-const db = mongoose.connection;
-// check error condition
-db.on('error', console.error.bind(console, 'Connection error'));
-// open connection and finally connect
-db.on('open', function () {
-    console.log('connected');
-})
-
-
-
-let AddressSchema = new mongoose.Schema ({
-    houseNumber: String,
+let StudentAddress = new mongoose.Schema({
+    houseNumber: Number,
     city: String,
     state: String,
     country: String
@@ -37,15 +18,18 @@ let StudentSchema = new mongoose.Schema({
 })
 
 // Create & compile model
-let Address = mongoose.model('Address', AddressSchema);
-
 let Student = mongoose.model('Student', StudentSchema);
 
+let Address = mongoose.model('Address', StudentAddress);
+
+
+
+
 let address = new Address({
-    houseNumber: '234',
-    city: "Pune",
-    state: "MH",
-    country: "IN"
+    houseNumber: 123,
+    city: 'Pune',
+    state: 'Maharashtra',
+    country: 'India'
 })
 
 
@@ -61,27 +45,44 @@ address.save(function (err, record) {
         address: record._id
     })
     student.save(function (err, stud) {
-        if (err) throw err;
+        if (err)
+            throw err;
         console.log(stud)
     })
-    //console.log(record)
 })*/
 
-/*User.
-findOne({ name: 'Val' }).
-populate({
-    path: 'friends',
-    // Get friends of friends - populate the 'friends' array for every friend
-    populate: { path: 'friends' }
-});*/
 
-Student.findOne({_id: '5e9bbd2d8b4e41181d32a6a8'})
+
+// Student populations
+Student.findOne({_id: '5e9c133325415a50b80cea21'})
     .populate({
         path: 'address',
-        match: {city: {$eq: 'Pune'}},
-        options: {limit: 2}
+        match: {houseNumber: {$gte: 100}},
+        options: {limit: 1}
     })
-    .exec(function (err, record) {
+    .exec(function (err, data) {
+        if (err) throw err;
+        console.log(data)
+    })
+
+
+//TODO:// multiple population
+/*Student.findOne({_id: '5e9c133325415a50b80cea21'})
+    .populate('address')
+    .populate('parent')
+    .exec(function (err, data) {
+        if (err) throw err;
+        console.log(data)
+    })*/
+
+//TODO:// Two level population (nested population)
+/*
+Student.findOne({_id: '5e9c133325415a50b80cea21'})
+.populate({
+    path: 'friend',
+    populate: {path: 'friend'}
+})
+.exec(function (err, data) {
     if (err) throw err;
-    console.log(record);
-});
+    console.log(data)
+})*/
